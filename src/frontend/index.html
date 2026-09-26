@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Task Manager</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+
+<body>
+
+    <main class="container">
+
+        <div class="header">
+            <h1>Task Manager</h1>
+
+            <div>
+                <button id="login-button">Login</button>
+                <button id="logout-button" hidden>Logout</button>
+            </div>
+        </div>
+
+        <div id="app" hidden>
+
+            <form id="task-form">
+                <input
+                    id="task-input"
+                    type="text"
+                    placeholder="Enter a new task"
+                    required
+                >
+
+                <button type="submit">Add Task</button>
+            </form>
+
+            <ul id="task-list"></ul>
+
+        </div>
+
+        <p id="login-message">
+            Please log in to view your tasks.
+        </p>
+
+    </main>
+
+    <script src="app.js"></script>
+
+</body>
+
+</html>
