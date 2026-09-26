@@ -37,7 +37,7 @@ data "aws_iam_policy_document" "github_actions_trust" {
       variable = "token.actions.githubusercontent.com:sub"
 
       values = [
-        "repo:cavemankavi@40056180/serverless-app@1388577767:ref:refs/heads/main"
+        "repo:Cavemankavi@40056180/serverless-app@1388577767:ref:refs/heads/main"
       ]
     }
   }
