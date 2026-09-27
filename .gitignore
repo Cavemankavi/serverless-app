@@ -24,3 +24,9 @@ override.tf.json
 
 # Terraform-generated Lambda packages
 infrastructure/*.zip
+
+# Python
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.venv/
