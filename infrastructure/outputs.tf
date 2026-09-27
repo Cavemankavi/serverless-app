@@ -1,11 +1,11 @@
 output "dynamodb_table_name" {
   description = "Name of the DynamoDB tasks table"
-  value       = aws_dynamodb_table.tasks.name
+  value       = aws_dynamodb_table.tasks_v2.name
 }
 
 output "dynamodb_table_arn" {
   description = "ARN of the DynamoDB tasks table"
-  value       = aws_dynamodb_table.tasks.arn
+  value       = aws_dynamodb_table.tasks_v2.arn
 }
 
 output "api_url" {

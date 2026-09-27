@@ -5,6 +5,12 @@ import os
 import boto3
 from botocore.exceptions import ClientError
 
+from task_utils import (
+    UnauthorizedError,
+    get_authenticated_owner_id,
+    unauthorized_response,
+)
+
 
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
@@ -17,14 +23,23 @@ def lambda_handler(event, context):
 
     logger.info("Received delete task request")
 
+    try:
+        owner_id = get_authenticated_owner_id(event)
+    except UnauthorizedError:
+        logger.warning("Request lacked an authenticated user identity")
+        return unauthorized_response()
+
     task_id = event["pathParameters"]["id"]
 
     try:
         table.delete_item(
             Key={
+                "owner_id": owner_id,
                 "task_id": task_id
             },
-            ConditionExpression="attribute_exists(task_id)"
+            ConditionExpression=(
+                "attribute_exists(owner_id) AND attribute_exists(task_id)"
+            ),
         )
 
     except ClientError as error:

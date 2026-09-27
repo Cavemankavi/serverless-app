@@ -6,6 +6,14 @@ from datetime import datetime, timezone
 
 import boto3
 
+from task_utils import (
+    UnauthorizedError,
+    build_list_sort_key,
+    get_authenticated_owner_id,
+    public_task,
+    unauthorized_response,
+)
+
 
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
@@ -17,6 +25,12 @@ table = dynamodb.Table(os.environ["TABLE_NAME"])
 def lambda_handler(event, context):
 
     logger.info("Received create task request")
+
+    try:
+        owner_id = get_authenticated_owner_id(event)
+    except UnauthorizedError:
+        logger.warning("Request lacked an authenticated user identity")
+        return unauthorized_response()
 
     try:
         body = json.loads(event.get("body") or "{}")
@@ -48,15 +62,25 @@ def lambda_handler(event, context):
             })
         }
 
+    task_id = str(uuid.uuid4())
+    created_at = datetime.now(timezone.utc)
+
     task = {
-        "task_id": str(uuid.uuid4()),
+        "owner_id": owner_id,
+        "task_id": task_id,
         "title": title.strip(),
         "completed": False,
-        "created_at": datetime.now(timezone.utc).isoformat()
+        "created_at": created_at.isoformat(),
+        "list_sort_key": build_list_sort_key(False, created_at, task_id),
     }
 
     try:
-        table.put_item(Item=task)
+        table.put_item(
+            Item=task,
+            ConditionExpression=(
+                "attribute_not_exists(owner_id) AND attribute_not_exists(task_id)"
+            ),
+        )
     except Exception:
         logger.exception("Failed to write task to DynamoDB")
 
@@ -77,5 +101,5 @@ def lambda_handler(event, context):
         "headers": {
             "Content-Type": "application/json"
         },
-        "body": json.dumps(task)
+        "body": json.dumps(public_task(task))
     }
