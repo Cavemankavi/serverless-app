@@ -1,8 +1,16 @@
-data "archive_file" "create_task" {
+data "archive_file" "task_handlers" {
   type = "zip"
 
-  source_file = "${path.module}/../src/lambda/create_task.py"
-  output_path = "${path.module}/create_task.zip"
+  source_dir  = "${path.module}/../src/lambda"
+  output_path = "${path.module}/task_handlers.zip"
+  excludes    = ["__pycache__", "*.pyc"]
+}
+
+locals {
+  lambda_environment = {
+    TABLE_NAME            = aws_dynamodb_table.tasks_v2.name
+    TASK_ORDER_INDEX_NAME = "user-task-order-index"
+  }
 }
 
 resource "aws_lambda_function" "create_task" {
@@ -12,21 +20,12 @@ resource "aws_lambda_function" "create_task" {
   handler = "create_task.lambda_handler"
   runtime = "python3.13"
 
-  filename         = data.archive_file.create_task.output_path
-  source_code_hash = data.archive_file.create_task.output_base64sha256
+  filename         = data.archive_file.task_handlers.output_path
+  source_code_hash = data.archive_file.task_handlers.output_base64sha256
 
   environment {
-    variables = {
-      TABLE_NAME = aws_dynamodb_table.tasks.name
-    }
+    variables = local.lambda_environment
   }
-}
-
-data "archive_file" "list_tasks" {
-  type = "zip"
-
-  source_file = "${path.module}/../src/lambda/list_tasks.py"
-  output_path = "${path.module}/list_tasks.zip"
 }
 
 resource "aws_lambda_function" "list_tasks" {
@@ -36,21 +35,12 @@ resource "aws_lambda_function" "list_tasks" {
   handler = "list_tasks.lambda_handler"
   runtime = "python3.13"
 
-  filename         = data.archive_file.list_tasks.output_path
-  source_code_hash = data.archive_file.list_tasks.output_base64sha256
+  filename         = data.archive_file.task_handlers.output_path
+  source_code_hash = data.archive_file.task_handlers.output_base64sha256
 
   environment {
-    variables = {
-      TABLE_NAME = aws_dynamodb_table.tasks.name
-    }
+    variables = local.lambda_environment
   }
-}
-
-data "archive_file" "get_task" {
-  type = "zip"
-
-  source_file = "${path.module}/../src/lambda/get_task.py"
-  output_path = "${path.module}/get_task.zip"
 }
 
 resource "aws_lambda_function" "get_task" {
@@ -60,21 +50,12 @@ resource "aws_lambda_function" "get_task" {
   handler = "get_task.lambda_handler"
   runtime = "python3.13"
 
-  filename         = data.archive_file.get_task.output_path
-  source_code_hash = data.archive_file.get_task.output_base64sha256
+  filename         = data.archive_file.task_handlers.output_path
+  source_code_hash = data.archive_file.task_handlers.output_base64sha256
 
   environment {
-    variables = {
-      TABLE_NAME = aws_dynamodb_table.tasks.name
-    }
+    variables = local.lambda_environment
   }
-}
-
-data "archive_file" "update_task" {
-  type = "zip"
-
-  source_file = "${path.module}/../src/lambda/update_task.py"
-  output_path = "${path.module}/update_task.zip"
 }
 
 resource "aws_lambda_function" "update_task" {
@@ -84,21 +65,12 @@ resource "aws_lambda_function" "update_task" {
   handler = "update_task.lambda_handler"
   runtime = "python3.13"
 
-  filename         = data.archive_file.update_task.output_path
-  source_code_hash = data.archive_file.update_task.output_base64sha256
+  filename         = data.archive_file.task_handlers.output_path
+  source_code_hash = data.archive_file.task_handlers.output_base64sha256
 
   environment {
-    variables = {
-      TABLE_NAME = aws_dynamodb_table.tasks.name
-    }
+    variables = local.lambda_environment
   }
-}
-
-data "archive_file" "delete_task" {
-  type = "zip"
-
-  source_file = "${path.module}/../src/lambda/delete_task.py"
-  output_path = "${path.module}/delete_task.zip"
 }
 
 resource "aws_lambda_function" "delete_task" {
@@ -108,12 +80,10 @@ resource "aws_lambda_function" "delete_task" {
   handler = "delete_task.lambda_handler"
   runtime = "python3.13"
 
-  filename         = data.archive_file.delete_task.output_path
-  source_code_hash = data.archive_file.delete_task.output_base64sha256
+  filename         = data.archive_file.task_handlers.output_path
+  source_code_hash = data.archive_file.task_handlers.output_base64sha256
 
   environment {
-    variables = {
-      TABLE_NAME = aws_dynamodb_table.tasks.name
-    }
+    variables = local.lambda_environment
   }
 }

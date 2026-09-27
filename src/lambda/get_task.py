@@ -4,6 +4,13 @@ import os
 
 import boto3
 
+from task_utils import (
+    UnauthorizedError,
+    get_authenticated_owner_id,
+    public_task,
+    unauthorized_response,
+)
+
 
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
@@ -16,13 +23,21 @@ def lambda_handler(event, context):
 
     logger.info("Received get task request")
 
+    try:
+        owner_id = get_authenticated_owner_id(event)
+    except UnauthorizedError:
+        logger.warning("Request lacked an authenticated user identity")
+        return unauthorized_response()
+
     task_id = event["pathParameters"]["id"]
 
     try:
         response = table.get_item(
             Key={
+                "owner_id": owner_id,
                 "task_id": task_id
-            }
+            },
+            ConsistentRead=True,
         )
     except Exception:
         logger.exception("Failed to retrieve task from DynamoDB")
@@ -59,5 +74,5 @@ def lambda_handler(event, context):
         "headers": {
             "Content-Type": "application/json"
         },
-        "body": json.dumps(task)
+        "body": json.dumps(public_task(task))
     }
