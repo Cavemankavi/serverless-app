@@ -6,6 +6,9 @@ on:
       - main
     paths:
       - "infrastructure/**"
+      - "src/**"
+      - ".github/workflows/terraform-ci.yml"
+      - ".github/workflows/terraform-cd.yml"
 
 permissions:
   id-token: write
