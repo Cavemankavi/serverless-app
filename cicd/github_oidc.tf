@@ -49,3 +49,44 @@ resource "aws_iam_role" "github_actions" {
 
   assume_role_policy = data.aws_iam_policy_document.github_actions_trust.json
 }
+
+data "aws_iam_policy_document" "github_plan_trust" {
+  statement {
+    effect = "Allow"
+
+    principals {
+      type = "Federated"
+
+      identifiers = [
+        aws_iam_openid_connect_provider.github.arn
+      ]
+    }
+
+    actions = [
+      "sts:AssumeRoleWithWebIdentity"
+    ]
+
+    condition {
+      test     = "StringEquals"
+      variable = "token.actions.githubusercontent.com:aud"
+
+      values = [
+        "sts.amazonaws.com"
+      ]
+    }
+
+    condition {
+      test     = "StringEquals"
+      variable = "token.actions.githubusercontent.com:sub"
+
+      values = [
+        "repo:Cavemankavi@40056180/serverless-app@1388577767:pull_request"
+      ]
+    }
+  }
+}
+
+resource "aws_iam_role" "github_plan" {
+  name               = "serverless-app-github-plan"
+  assume_role_policy = data.aws_iam_policy_document.github_plan_trust.json
+}

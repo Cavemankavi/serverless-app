@@ -6,6 +6,7 @@ provider "aws" {
       Project     = "serverless-app"
       Environment = var.environment
       ManagedBy   = "Terraform"
+      Deployment  = "GitHubActions"
     }
   }
 }
